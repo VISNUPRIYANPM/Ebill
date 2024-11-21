@@ -1,0 +1,44 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h> 
+#include <SoftwareSerial.h> 
+SoftwareSerial espSerial(4, 5); // RX, TX 
+LiquidCrystal_I2C lcd(0x27, 16, 2); 
+int meter_input = 2; 
+float impulses = 0; 
+float unit; 
+float amount; 
+int buzzer = A0; 
+void setup() { 
+// put your setup code here, to run once: 
+Serial.begin(9600); 
+espSerial.begin(9600); 
+lcd.init(); 
+lcd.backlight(); 
+lcd.clear(); 
+pinMode(meter_input, INPUT); 
+pinMode(buzzer, OUTPUT); 
+attachInterrupt(digitalPinToInterrupt(meter_input), impulses_count, FALLING); 
+digitalWrite(buzzer, LOW); 
+} 
+void loop() { 
+// put your main code here, to run repeatedly: 
+unit = impulses / 3200; 
+amount = unit * 5;String sensorData = String(unit) + "," + String(amount); 
+espSerial.println(sensorData); 
+lcd.setCursor(0, 0); 
+lcd.print("Unit : "); 
+lcd.print(unit, 2); 
+lcd.setCursor(0, 1); 
+lcd.print("Rs : "); 
+lcd.print(amount); 
+delay(100); 
+} 
+void impulses_count() { 
+impulses++; 
+buz(); 
+} 
+void buz() { 
+digitalWrite(buzzer, HIGH); 
+delay(200); 
+digitalWrite(buzzer, LOW); 
+}
